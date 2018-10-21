@@ -46,7 +46,30 @@ class BloxorzGame(Problem):
         :param decoder: decoder to be used in validation. Default decoder is used if not given.
         :return: True if valid, False otherwise.
         """
-        return True     # TODO: Add rectangularity, 0 < number of block tiles < 3
+        # Set default decoder if not given
+        decoder = decoder if decoder else BloxorzGame.decoder_gen()
+
+        # CHECK IF RECTANGULAR: Remove delimiters and newlines to have a list of rows represented as string
+        filtered_map = str_map.replace(decoder['col_sep'], '') \
+            .split(decoder['row_sep'])
+        # For rectangular map, number of tile in each row should be equal.
+        for i in range(1, len(filtered_map)):
+            if len(filtered_map[0]) != len(filtered_map[i]):
+                return False    # Even one inequality is enough to be invalid.
+
+        # CHECK NUMBER OF BLOCK TILES:
+        if not 0 < str_map.count(
+                list(decoder.keys())[list(decoder.values()).index(
+                    BloxorzGame._BLOCK_VAL)]) < 3:
+            return False
+
+        # CHECK INVALID CHARACTERS:
+        for key in decoder:
+            # Remove all valid characters to see if any invalid character exists in the map
+            str_map = str_map.replace(
+                key if 'col_sep' != key != 'row_sep' else decoder[key],
+                '')
+        return not bool(len(str_map))  # Non-zero length indicate there exist at least one invalid char
 
     def __init__(self, game_map=None, decoder=None):
         """
@@ -82,7 +105,8 @@ class BloxorzGame(Problem):
         self._decoder = decoder if decoder else self._decoder   # In the worst case, _decoder is default via __init__.
 
         if not self.validate_map(str_map, self._decoder):
-            raise ValueError('Str map contains invalid value(s) undeclared in the decoder!')
+            raise ValueError('Str map contains invalid value(s) undeclared in the decoder or invalid initial state'
+                             ' or it is not rectangular!')
 
         # Remove delimiters and newlines to have a list of rows represented as string
         filtered_map = str_map.replace(self._decoder['col_sep'], '') \
