@@ -83,6 +83,7 @@ class BloxorzGame(Problem):
         """
         self._map = None
         self._decoder = decoder if decoder else BloxorzGame.decoder_gen()
+        self._state = None
 
         # Initial and goal states of the problem. Set to None by default. Problem already defines the class variables...
         problem_parameters = (None, None)
@@ -90,6 +91,7 @@ class BloxorzGame(Problem):
             problem_parameters = self.init_map(game_map, self._decoder)
 
         Problem.__init__(self, *problem_parameters)
+        self._state = [list(self.initial[0]), self.initial[1]]
 
     def actions(self, state):
         pass
@@ -147,6 +149,42 @@ class BloxorzGame(Problem):
 
     def result(self, state, action):
         pass
+
+    def roll_block(self, d, apply_action=True):
+        """
+        Roll the block in the given direction. Roll is only possible in the direction along the short edge since the
+        block flips over its long edge. Position of the block is updated but the orientation does not change as a
+        result of this action. If rolling is not possible, the action is simply not applied.
+        :param d: intended direction of motion
+        :param apply_action: Execute the action if True, otherwise check applicability.
+        :return: True if motion is applied or can be applied; False otherwise
+        """
+        # Block cannot roll in the direction of orientation or if it is vertical.
+        if self._state[1] != abs(d) and self._state[1] != 3:
+            # Deep copy for pseudo-roll
+            state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+            state[0][abs(d) - 1] += int(d / abs(d))
+
+            # Check if the block is in the safe tile for the pseudo-rolling. If the player wants to move into an empty
+            # tile, it should be possible. However for the pseudo-rolling case, the purpose is to determine whether
+            # it is possible to move or not.
+            if not apply_action:
+                if not self.validate_state(state):
+                    return False
+                return True
+            # If not pseudo, apply the action:
+            self._state = state
+            return True
+
+        return False
+
+    def validate_state(self, state):
+        """
+        Validate the state for the current map. If the block is completely in safe tile(s), then the state is valid.
+        :param state: to be validated
+        :return: True if state is valid, False otherwise.
+        """
+        return True
 
     def value(self, state):
         pass
