@@ -184,6 +184,18 @@ class BloxorzGame(Problem):
         :param state: to be validated
         :return: True if state is valid, False otherwise.
         """
+        # Regardless of the block orientation, check the position given by the state definition.
+        if not self._map[state[0][1]][state[0][0]]:  # Indexing convention of the map is reverse due to init_map!
+            return False
+
+        # For vertical orientation of the block, validation is completed.
+        # Find the adjacent occupied tile from the direction give by the state. Having the position (x, y), we have
+        #   (x+1, y) for x-oriented block
+        #   (x, y+1) for y-oriented block
+        if not state[1] == 3 and\
+           not self._map[state[0][1] + 1 if state[1] == 2 else state[0][1]]\
+                        [state[0][0] + 1 if state[1] == 1 else state[0][0]]:
+            return False
         return True
 
     def value(self, state):
