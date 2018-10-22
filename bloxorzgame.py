@@ -147,6 +147,45 @@ class BloxorzGame(Problem):
         # Convert to tuples since they won't change anymore.
         return tuple(initial), tuple(goal)
 
+    def pitch_block(self, d, apply_action=True):
+        """
+        Pitch the block in the given direction. Pitch is only possible in the direction along the long edge if it is
+        horizontal or in any direction when it is vertical. Both the position and orientation of the block changes as
+        a result of this action. If pitching is not possible,  the action is simply not applied.
+        :param d: intended direction of motion
+        :param apply_action: Execute the action if True, otherwise check applicability.
+        :return: True if motion is applied or can be applied; False otherwise
+        """
+        # The block can only pitch in the direction of its orientation when horizontal or in any direction when
+        # vertical.
+        if self._state[1] == abs(d) or self._state[1] == 3:
+            # Deep copy for pseudo-pitch
+            state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+
+            # Due to definition of the position, the block moves 2 tiles along positive direction and 1 tile
+            # along negative direction when it is horizontal. However, for the vertical case, the block moves 1 tile
+            # along positive direction and 2 tiles along negative direction.
+            if state[1] == 3:
+                displacement = -2 if d < 0 else 1
+                state[1] = abs(d)
+            else:
+                displacement = -1 if d < 0 else 2
+                state[1] = 3
+
+            state[0][abs(d) - 1] += displacement
+
+            # Check if the block is in the safe tile for the pseudo-rolling. If the player wants to move into an empty
+            # tile, it should be possible. However for the pseudo-pitching case, the purpose is to determine whether
+            # it is possible to move or not.
+            if not apply_action:
+                return self.validate_state(state)
+
+            # If not pseudo, apply the action:
+            self._state = state
+            return True
+
+        return False
+
     def result(self, state, action):
         pass
 
@@ -159,7 +198,7 @@ class BloxorzGame(Problem):
         :param apply_action: Execute the action if True, otherwise check applicability.
         :return: True if motion is applied or can be applied; False otherwise
         """
-        # Block cannot roll in the direction of orientation or if it is vertical.
+        # The block cannot roll in the direction of its orientation when horizontal and in any direction when vertical.
         if self._state[1] != abs(d) and self._state[1] != 3:
             # Deep copy for pseudo-roll
             state = [[self._state[0][0], self._state[0][1]], self._state[1]]
@@ -169,9 +208,8 @@ class BloxorzGame(Problem):
             # tile, it should be possible. However for the pseudo-rolling case, the purpose is to determine whether
             # it is possible to move or not.
             if not apply_action:
-                if not self.validate_state(state):
-                    return False
-                return True
+                return self.validate_state(state)
+
             # If not pseudo, apply the action:
             self._state = state
             return True
