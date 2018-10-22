@@ -94,7 +94,22 @@ class BloxorzGame(Problem):
         self._state = [list(self.initial[0]), self.initial[1]]
 
     def actions(self, state):
-        pass
+        """
+        Given any possible state, returns applicable action-argument list.
+        :param state: Possible state in the map.
+        :return: List of tuples in the form [(act1, arg11, arg12, ...), (act2, arg21, arg 22, ...)]
+        """
+        # Game actions utilizes class variables, so set the required variables first.
+        backup_state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+        self._state = state
+
+        # Actions of the game are pitch and roll motion, possible directions are +-x and +-y.
+        actions = (self.pitch_block, self.roll_block)
+        args = (1, 2, -2, -1)
+        act_arg = [(action, arg) for action in actions for arg in args
+                   if action(arg, apply_action=False)]
+        self._state = backup_state
+        return act_arg
 
     def init_map(self, str_map, decoder=None):
         """
