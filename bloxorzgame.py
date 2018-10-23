@@ -96,6 +96,13 @@ class BloxorzGame(Problem):
         Problem.__init__(self, *problem_parameters)
         self._state = self.initial
 
+    def _in_map(self, x, y):
+        """
+        Check if the given indices corresponds to somewhere in map
+        :return: True if in the map, False otherwise
+        """
+        return y < len(self._map) and x < len(self._map[0])
+
     def actions(self, state):
         """
         Given any possible state, returns applicable action-argument list.
@@ -274,6 +281,8 @@ class BloxorzGame(Problem):
         :return: True if state is valid, False otherwise.
         """
         # Regardless of the block orientation, check the position given by the state definition.
+        if not self._in_map(state[0][0], state[0][1]):
+            return False
         if not self._map[state[0][1]][state[0][0]]:  # Indexing convention of the map is reverse due to init_map!
             return False
 
@@ -281,9 +290,11 @@ class BloxorzGame(Problem):
         # Find the adjacent occupied tile from the direction give by the state. Having the position (x, y), we have
         #   (x+1, y) for x-oriented block
         #   (x, y+1) for y-oriented block
-        if not state[1] == 3 and \
-           not self._map[state[0][1] + 1 if state[1] == 2 else state[0][1]] \
-                        [state[0][0] + 1 if state[1] == 1 else state[0][0]]:
+        x_index = state[0][0] + 1 if state[1] == 1 else state[0][0]
+        y_index = state[0][1] + 1 if state[1] == 2 else state[0][1]
+        if not self._in_map(x_index, y_index):
+            return False
+        if not state[1] == 3 and not self._map[y_index][x_index]:
             return False
         return True
 
