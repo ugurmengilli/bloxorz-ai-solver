@@ -209,7 +209,23 @@ class BloxorzGame(Problem):
         return False
 
     def result(self, state, action):
-        pass
+        """
+        Given any possible state, returns the result of action applied on the state.
+        :param state: Possible state in the map.
+        :param action: to be applied
+        :return: Result of the applied action
+        """
+        # Game actions utilizes class variables, so set the required variables first.
+        backup_state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+        self._state = state
+
+        # Knowing the signature of the functions, apply the action.
+        action[0](*action[1:])
+        # The result is written on the class variable self._state.
+        state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+
+        self._state = backup_state
+        return state
 
     def roll_block(self, d, apply_action=True):
         """
