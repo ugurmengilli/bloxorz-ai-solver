@@ -94,7 +94,7 @@ class BloxorzGame(Problem):
             problem_parameters = self.init_map(game_map, self._decoder)
 
         Problem.__init__(self, *problem_parameters)
-        self._state = [list(self.initial[0]), self.initial[1]]
+        self._state = self.initial
 
     def actions(self, state):
         """
@@ -103,7 +103,7 @@ class BloxorzGame(Problem):
         :return: List of tuples in the form [(act1, arg11, arg12, ...), (act2, arg21, ...), ...]
         """
         # Game actions utilizes class variables, so set the required variables first.
-        backup_state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+        backup_state = self._state
         self._state = state
 
         # Actions of the game and their possible directions +-x and +-y.
@@ -122,7 +122,7 @@ class BloxorzGame(Problem):
         :return: True if goal is reached, False otherwise.
         """
         for goal in self.goal:
-            if list(goal[0]) == state[0]:
+            if goal[0] == state[0]:
                 return goal[1] == state[1]
         return False
 
@@ -194,7 +194,7 @@ class BloxorzGame(Problem):
         # or in any direction when vertical.
         if self._state[1] == abs(d) or self._state[1] == 3:
             # Deep copy for pseudo-pitch
-            state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+            state = [list(self._state[0]), self._state[1]]
 
             # Due to the definition of position of state, the block moves 2 tiles along positive
             # direction and 1 tile along negative direction when it is horizontal. However, for
@@ -215,7 +215,7 @@ class BloxorzGame(Problem):
                 return self.validate_state(state)
 
             # If not pseudo, apply the action:
-            self._state = state
+            self._state = (tuple(state[0]), state[1])
             return True
         return False
 
@@ -227,13 +227,13 @@ class BloxorzGame(Problem):
         :return: Result of the applied action
         """
         # Game actions utilizes class variables, so set the required variables first.
-        backup_state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+        backup_state = self._state
         self._state = state
 
         # Knowing the signature of the functions, apply the action.
         action[0](*action[1:])
         # The result is written on the class variable self._state.
-        state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+        state = self._state
 
         self._state = backup_state
         return state
@@ -252,7 +252,7 @@ class BloxorzGame(Problem):
         # direction when vertical.
         if self._state[1] != abs(d) and self._state[1] != 3:
             # Deep copy for pseudo-roll
-            state = [[self._state[0][0], self._state[0][1]], self._state[1]]
+            state = [list(self._state[0]), self._state[1]]
             state[0][abs(d) - 1] += int(d / abs(d))
 
             # Check if the block is in the safe tile for the pseudo-rolling. If the player wants
@@ -262,7 +262,7 @@ class BloxorzGame(Problem):
                 return self.validate_state(state)
 
             # If not pseudo, apply the action:
-            self._state = state
+            self._state = (tuple(state[0]), state[1])
             return True
         return False
 
