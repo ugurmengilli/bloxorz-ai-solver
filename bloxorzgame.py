@@ -115,6 +115,17 @@ class BloxorzGame(Problem):
         self._state = backup_state  # Restore the state for convenience
         return act_arg
 
+    def goal_test(self, state):
+        """
+        Redefine the goal test to handle customizations.
+        :param state: to be tested.
+        :return: True if goal is reached, False otherwise.
+        """
+        for goal in self.goal:
+            if list(goal[0]) == state[0]:
+                return goal[1] == state[1]
+        return False
+
     def init_map(self, str_map, decoder=None):
         """
         Given a valid map where the validity can be checked using BloxorzGame.validate_map, determine the initial
