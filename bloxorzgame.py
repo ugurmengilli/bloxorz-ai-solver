@@ -288,4 +288,9 @@ class BloxorzGame(Problem):
         return True
 
     def value(self, state):
-        pass
+        """
+        Not related to the implementations of the search algorithms of interest.
+        :param state: -
+        :return: 1
+        """
+        return 1
